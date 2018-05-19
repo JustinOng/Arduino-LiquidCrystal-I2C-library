@@ -150,7 +150,7 @@ public:
 	void printstr(const char[]);
 
 private:
-	SlowSoftI2CMaster si;
+	SlowSoftI2CMaster *_si;
 	void send(uint8_t, uint8_t);
 	void write4bits(uint8_t);
 	void expanderWrite(uint8_t);

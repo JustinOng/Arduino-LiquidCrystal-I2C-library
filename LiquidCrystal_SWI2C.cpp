@@ -25,7 +25,7 @@
 
 LiquidCrystal_SWI2C::LiquidCrystal_SWI2C(uint8_t sda_pin, uint8_t scl_pin, uint8_t lcd_addr, uint8_t lcd_cols, uint8_t lcd_rows, uint8_t charsize)
 {
-	si = SlowSoftI2CMaster(sda_pin, scl_pin);
+	_si = new SlowSoftI2CMaster(sda_pin, scl_pin);
 	_addr = lcd_addr;
 	_cols = lcd_cols;
 	_rows = lcd_rows;
@@ -34,7 +34,7 @@ LiquidCrystal_SWI2C::LiquidCrystal_SWI2C(uint8_t sda_pin, uint8_t scl_pin, uint8
 }
 
 void LiquidCrystal_SWI2C::begin() {
-	Wire.begin();
+	if (!_si->i2c_init()) return;
 	_displayfunction = LCD_4BITMODE | LCD_1LINE | LCD_5x8DOTS;
 
 	if (_rows > 1) {
@@ -227,9 +227,9 @@ void LiquidCrystal_SWI2C::write4bits(uint8_t value) {
 }
 
 void LiquidCrystal_SWI2C::expanderWrite(uint8_t _data){
-	Wire.beginTransmission(_addr);
-	Wire.write((int)(_data) | _backlightval);
-	Wire.endTransmission();
+	if (!_si->i2c_start((_addr << 1) | I2C_WRITE)) return;
+	_si->i2c_write((int)(_data) | _backlightval);
+	_si->i2c_stop();
 }
 
 void LiquidCrystal_SWI2C::pulseEnable(uint8_t _data){
